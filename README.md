@@ -2,7 +2,7 @@
 
 Painel web local para acompanhar um workspace multiagente montado no app Maestri com agentes Claude Code. Um servidor Node.js sem dependências lê os arquivos que os agentes gravam (log de eventos, fila de pendências, estado do Trello, uso do plano, prospecção) e mostra tudo numa página só, em `http://127.0.0.1`.
 
-Este repositório traz **só o painel** e os scripts de linha de comando que gravam os dados que ele lê. Os agentes em si (papéis, prompts, skills, rotinas) não estão aqui: cada um monta os seus.
+Este repositório traz **só o painel** e os scripts de linha de comando que gravam os dados que ele lê. Os agentes em si (papéis, prompts, rotinas) não estão aqui: cada um monta os seus. O método que eles seguem vem como modelo para adaptar (veja [Skills e protocolos do workspace](#skills-e-protocolos-do-workspace)).
 
 ## A ideia
 
@@ -247,6 +247,11 @@ painel-maestro/
 │   │   ├── src/estilo/       CSS por tela
 │   │   └── scripts/publicar.js  junta o build num HTML único
 │   └── testes/               testes, mocks e servidores de demonstração
+├── skills/
+│   ├── cerebro/              orquestracao, pendencias, painel, onboarding-agente
+│   └── compartilhadas/       protocolo-delegacao, registro-eventos
+├── conhecimento/protocolos/  delegação, pendências, registro, autonomia
+├── exemplos/                 CLAUDE.md (regra comum) e responsabilidade-cerebro.md
 ├── package.json
 ├── LICENSE
 └── README.md
@@ -259,6 +264,23 @@ painel-maestro/
 - O painel só lê arquivos: quem mantém os dados em dia são os seus agentes (o Trello, por exemplo, só aparece se algum agente gravar `estado/trello/resumo.json`).
 - O botão de conversar com o Cérebro pelo painel ainda não existe (`POST /api/cerebro` responde 501).
 - O painel saiu de um workspace maior. Alguns comentários do código citam scripts e documentos desse workspace que não vêm neste repositório (por exemplo, o vigia do WhatsApp e o captador de leads): eles só produzem os arquivos que o painel lê, e o formato desses arquivos está descrito acima.
+
+## Skills e protocolos do workspace
+
+Além do painel, o repositório traz o método que os agentes seguem, em texto. São **modelos para adaptar**: copie, troque nomes, projetos e regras pelos do seu workspace e mantenha o que servir. Os caminhos citados são relativos à raiz do repositório (o `MAESTRO_DIR`); arquivos como `registro/agentes.md` e `registro/roteamento.md` são do workspace de quem usar e não vêm aqui.
+
+- **`skills/cerebro/`**, skills do agente principal (Cérebro):
+  - `orquestracao`: classificar cada pedido do dono, achar quem responde por ele, delegar, acompanhar, validar e responder (resultado, o que precisa do dono, detalhes);
+  - `pendencias`: a fila de decisões do dono, do jeito de escrever (contexto, opções, recomendação) até devolver a decisão a quem pediu e fechar;
+  - `painel`: manter este painel no ar e com dado fresco;
+  - `onboarding-agente`: criar um sub-agente novo para um domínio e ligá-lo ao resto.
+- **`skills/compartilhadas/`**, para todos os agentes:
+  - `protocolo-delegacao`: os envelopes [PEDIDO], [RESPOSTA], [AVISO] e [COBRANÇA], o fluxo `F-AAAAMMDD-NNNN` e como mandar com `maestri ask` sem perder nem duplicar pedido;
+  - `registro-eventos`: como gravar cada evento com `bin/registrar.js` (tipo, resumo, direção, resultado) e quando abrir pendência com `bin/pendencia.js`.
+- **`conhecimento/protocolos/`**: as regras por trás das skills, em quatro arquivos: delegação, pendências, registro e autonomia (o que cada agente faz sozinho, o que propõe e o que é sempre do dono).
+- **`exemplos/`**: `CLAUDE.md`, a regra comum de todos os agentes do workspace, e `responsabilidade-cerebro.md`, o papel do agente principal.
+
+As skills seguem o formato de skill do Claude Code (pasta com `SKILL.md` e cabeçalho `name`/`description`). Para usá-las, copie ou ligue as pastas em `.claude/skills/` do workspace.
 
 ## Licença
 
